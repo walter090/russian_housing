@@ -17,3 +17,6 @@ class StringOneHotEncoder(object):
 
     def fit_transform(self, x):
         return self.fit(x).transform(x)
+
+    def inverse_transform(self, x):
+        raise NotImplementedError
