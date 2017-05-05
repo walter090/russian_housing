@@ -1,4 +1,4 @@
-from sklearn.neighbors import KNeighborsRegressor
+from sklearn.neighbors import KNeighborsRegressor, KNeighborsClassifier
 
 
 class KNNImputer(object):
@@ -16,9 +16,13 @@ class KNNImputer(object):
         preprocessed, i.e. does not contain any string/boolean values
         :return: a copy of the transformed data
         """
+        """
+        TODO add argument feature_name to enable impute one specific feature
+        and enable the option between discrete and continuous values
+        """
         nan_data = data[data.isnull().any(axis=1)]
         purged_data = data.dropna()  # purged_data + nan_data = data
-        rgr = KNeighborsRegressor(n_neighbors=self.k)
+        imp = KNeighborsRegressor(n_neighbors=self.k)
         new_data = nan_data.copy()
 
         for _, row in nan_data.iterrows():
@@ -26,9 +30,9 @@ class KNNImputer(object):
             knn_train = purged_data.drop(nan_cols, axis=1)
             no_nan_row = row.drop(nan_cols)
             for target in nan_cols:
-                rgr.fit(knn_train, purged_data[target])
+                imp.fit(knn_train, purged_data[target])
                 if inplace:
-                    data.loc[data['id'] == row['id']][target] = rgr.predict(no_nan_row)
+                    data.loc[data['id'] == row['id']][target] = imp.predict(no_nan_row)
                 else:
-                    new_data.loc[data['id'] == row['id']][target] = rgr.predict(no_nan_row)
+                    new_data.loc[data['id'] == row['id']][target] = imp.predict(no_nan_row)
         return purged_data.append(new_data)
