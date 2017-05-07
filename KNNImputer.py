@@ -6,7 +6,7 @@ class KNNImputer(object):
         self.missing_values = missing_values
         self.k = k
 
-    def impute(self, data, inplace=False):
+    def impute(self, data, inplace=False,):
         """
         imputer function for knn imputer. find all data entries
         with missing data. go through each entry and apply knn regression
