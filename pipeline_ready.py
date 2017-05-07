@@ -17,3 +17,8 @@ class FeatureExtractor(BaseEstimator, TransformerMixin):
 
     def transform(self, x):
         return x[self.features]
+
+
+class FeatureDrop(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        raise NotImplementedError
