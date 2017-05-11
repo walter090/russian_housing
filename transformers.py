@@ -42,6 +42,7 @@ class LogNormalizer(BaseEstimator, TransformerMixin):
         return np.log(x)
 
 
+@DeprecationWarning
 class FeatureExtractor(BaseEstimator, TransformerMixin):
     """
     extracts feature data for sklearn feature union
