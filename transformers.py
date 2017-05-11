@@ -1,5 +1,6 @@
 from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder
+from sklearn_pandas import DataFrameMapper
 
 
 class StringOneHotEncoder(TransformerMixin, BaseEstimator):
@@ -32,9 +33,21 @@ class StringOneHotEncoder(TransformerMixin, BaseEstimator):
         raise NotImplementedError
 
 
+class LogNormalizer(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        pass
+
+    def fit_transform(self, x, y=None, **fit_params):
+        import numpy as np
+        return np.log(x)
+
+
 class FeatureExtractor(BaseEstimator, TransformerMixin):
     """
     extracts feature data for sklearn feature union
+    
+    (with the use of sklearn-pandas, this class does not seem to be
+    necessary anymore)
     """
 
     def __init__(self, features):
@@ -52,3 +65,18 @@ class FeatureExtractor(BaseEstimator, TransformerMixin):
 
     def fit_transform(self, x, y=None, **fit_params):
         return self.transform(x)
+
+
+class FeatureMapper(BaseEstimator, TransformerMixin):
+    def __int__(self, transformations):
+        """
+        constructor
+        :param transformations: array. a list of pairs of string value feature name
+        and transformations to be performed on them, this parameter will be fed into
+        the DataFrameMapper
+        :return: 
+        """
+        self.transformations = transformations
+
+    def fit_transform(self, **kwargs):
+        return DataFrameMapper(self.transformations)
