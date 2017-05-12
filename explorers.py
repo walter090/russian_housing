@@ -35,3 +35,27 @@ def remove_missing(data, minimal=0.1, full=False, inplace=False):
     else:
         data.drop(features_missing, axis=1, inplace=True)
         return None
+
+
+def make_transformations(data, sub_tran, filler=None):
+    """
+    this function is written for the ease of use of sklearn-pandas.
+    sklearn-pandas DataFrameMapper only keeps features that are in the 
+    transformation lists, columns that does not need transformations need
+    to specify transformation as None. this function also provides an option
+    to fill these features with the same transformer, specified by filler
+    argument, default is None, not transformations
+    :param data: pandas data frame to extract features from
+    :param sub_tran: array. a list of pairs of feature names
+     and transformations.
+    :param filler: value or transformation to for filled features, default is None,
+    filler argument takes a class
+    :return: 
+    """
+    sub_features = [trans_pair[0] for trans_pair in sub_tran]
+    appending_features = [feature for feature in list(data) if feature not in sub_features]
+    filled = [(feature, filler if filler is None else filler()) for feature in appending_features]
+    complete = []
+    complete.extend(sub_tran)
+    complete.extend(filled)
+    return complete
