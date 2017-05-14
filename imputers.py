@@ -1,4 +1,6 @@
-from sklearn.neighbors import KNeighborsRegressor, KNeighborsClassifier
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.neighbors import KNeighborsRegressor
+import tensorflow as tf
 
 
 class KNNImputer(object):
@@ -6,7 +8,7 @@ class KNNImputer(object):
         self.missing_values = missing_values
         self.k = k
 
-    def impute(self, data, inplace=False,):
+    def impute(self, data, inplace=False):
         """
         imputer function for knn imputer. find all data entries
         with missing data. go through each entry and apply knn regression
@@ -36,3 +38,35 @@ class KNNImputer(object):
                 else:
                     new_data.loc[data['id'] == row['id']][target] = imp.predict(no_nan_row)
         return purged_data.append(new_data)
+
+
+class RegressionImputer(BaseEstimator, TransformerMixin):
+    """
+    another approach to missing data imputation: linear regression
+    """
+
+    def __init__(self, missing_values='NaN'):
+        self.missing_values = missing_values
+
+    def fit_transform(self, X, y=None, **fit_params):
+        raise NotImplementedError
+
+    @staticmethod
+    def input(data):
+        """
+        input function for the tensorflow regression model
+        :param data: pandas data frame
+        :return: a tuple of features and labels
+        """
+        continuous_features = []
+        categorical_features = []
+
+        for column in data.columns:
+            if column.dtype == 'object':
+                categorical_features.append(column)
+            else:
+                continuous_features.append(column)
+
+        continuous_data = [{feature: tf.constant(data.values)} for feature in continuous_features]
+        categorical_data = [{feature: tf.one_hot()
+                             for feature in categorical_features}]
