@@ -3,8 +3,7 @@ import tensorflow as tf
 
 class DeepRegressor(object):
     def __init__(self, n_layers, n_input_features, keep_prob=0.95, hidden_layer_spec=None):
-        """
-        constructor
+        """Constructor
         :param n_layers: number of hidden layers
         :param n_input_features: number of input features
         :param keep_prob: keep probability for dropout
@@ -31,8 +30,7 @@ class DeepRegressor(object):
             self.keep_prob = None
 
     def build_net(self, x):
-        """
-        This is the method that builds the multilayer neural network for regression
+        """This is the method that builds the multilayer neural network for regression
         :param x: Training data
         :return: output layer (prediction)
         """
@@ -73,8 +71,7 @@ class DeepRegressor(object):
 
     @staticmethod
     def __init_weights_biases(shape):
-        """
-        initialize weights or biases according to the given shape
+        """Initialize weights or biases according to the given shape
         :param shape: shape of the variable
         :return: TensorFlow variable
         """
@@ -88,8 +85,7 @@ class DeepRegressor(object):
                optimizer_class=tf.train.AdamOptimizer,
                train_epochs=1000,
                verbose_every=50):
-        """
-        This function launches the session and starts training the
+        """This function launches the session and starts training the
         built neural net
         :param verbose_every: int, this argument sets the number of epochs before a
         status display
@@ -98,7 +94,7 @@ class DeepRegressor(object):
         :param batch_size: int, size of each batch
         :param train_epochs: number of epochs to train the model before stopping
         :param optimizer_class: Tensorflow optimizer class, default AdamOptimizer
-        :return:
+        :return: None
         """
         predictions = self.build_net(self.x)
         cost = tf.reduce_mean(tf.square(predictions - self.y))
@@ -121,13 +117,13 @@ class DeepRegressor(object):
                     x_batch = x_train[batch * batch_size: (batch + 1) * batch_size]
                     y_batch = y_train[batch * batch_size: (batch + 1) * batch_size]
                     _, c, pred, acc = session.run([optimizer, cost, predictions, train_accuracy],
-                                                  feed_dict={self.x: x_train,
-                                                             self.y: y_train,
+                                                  feed_dict={self.x: x_batch,
+                                                             self.y: y_batch,
                                                              self.keep_prob: self.keep_prob_value})
                     total_train_accuracy += acc / total_batch
                     total_cost += c / total_batch
 
                 if epoch % verbose_every == 0:
-                    print 'Total training accuracy: {0}, total cost: {1}'\
-                        .format(total_train_accuracy, total_cost)
+                    print 'At epoch {0}, Total training accuracy: {1:.5f}, total cost: {2:.5f}'\
+                        .format(epoch, total_train_accuracy, total_cost)
             print 'Training complete'
