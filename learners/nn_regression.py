@@ -107,6 +107,7 @@ class DeepRegressor(object):
         train_accuracy = tf.reduce_mean(correct_predictions)
 
         total_train_accuracy = 0
+        total_cost = 0
 
         initializer = tf.global_variables_initializer()
 
@@ -119,7 +120,14 @@ class DeepRegressor(object):
                 for batch in range(total_batch - 1):
                     x_batch = x_train[batch * batch_size: (batch + 1) * batch_size]
                     y_batch = y_train[batch * batch_size: (batch + 1) * batch_size]
-                    _, c, pred = session.run([optimizer, cost, predictions],
-                                             feed_dict={self.x: x_train,
-                                                        self.y: y_train,
-                                                        self.keep_prob: self.keep_prob_value})
+                    _, c, pred, acc = session.run([optimizer, cost, predictions, train_accuracy],
+                                                  feed_dict={self.x: x_train,
+                                                             self.y: y_train,
+                                                             self.keep_prob: self.keep_prob_value})
+                    total_train_accuracy += acc / total_batch
+                    total_cost += c / total_batch
+
+                if epoch % verbose_every == 0:
+                    print 'Total training accuracy: {0}, total cost: {1}'\
+                        .format(total_train_accuracy, total_cost)
+            print 'Training complete'
