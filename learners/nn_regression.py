@@ -2,10 +2,11 @@ import tensorflow as tf
 
 
 class DeepRegressor(object):
-    def __init__(self, n_layers, keep_prob=0.9, hidden_layer_spec=None):
+    def __init__(self, n_layers, input_features, keep_prob=0.9, hidden_layer_spec=None):
         """
         constructor
         :param n_layers: number of hidden layers
+        :param input_features: list of feature names
         :param keep_prob: keep probability for dropout
         :param hidden_layer_spec: list of layers in the form of list of
          dictionaries of {'num_features': , 'keep_prob': }
@@ -14,10 +15,13 @@ class DeepRegressor(object):
         same setup. This list should only include hidden layers, as the name
         indicates
         """
+        # TODO select feature, data input
         self.n_layers = n_layers
         self.keep_prob = keep_prob
         self.hidden_layer_spec = hidden_layer_spec
         self.layers_w_b = []
+        self.x = tf.placeholder(dtype='float', shape=[None, len(input_features)])
+        self.y = tf.placeholder(dtype='float', shape=[None])
 
         if hidden_layer_spec is not None:
             if hidden_layer_spec.__class__ is not list:
@@ -28,10 +32,10 @@ class DeepRegressor(object):
     def build_net(self, x):
         """
         This is the method that builds the multilayer neural network for regression
-        :param x: training data
+        :param x: Training data
         :return: output layer
         """
-        n_input = x.shape[2]  # number of input features
+        n_input = x.shape[1]  # number of input features
         n_output = 1  # number of output neurons
 
         # The following code constructs the list of weights and biases,
@@ -75,3 +79,13 @@ class DeepRegressor(object):
         """
         init = tf.random_normal(shape, stddev=0.1)
         return tf.Variable(init)
+
+    def launch(self, cost=None, optimizer=None):
+        """
+        This function launches the session and starts training testing the
+        built neural net
+        :param cost:
+        :param optimizer:
+        :return:
+        """
+        raise NotImplementedError
