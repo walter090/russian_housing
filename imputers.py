@@ -1,6 +1,10 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.neighbors import KNeighborsRegressor
-import tensorflow as tf
+
+
+class Imputer(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        raise NotImplementedError
 
 
 class KNNImputer(object):
@@ -67,6 +71,6 @@ class RegressionImputer(BaseEstimator, TransformerMixin):
             else:
                 continuous_features.append(column)
 
-        continuous_data = [{feature: tf.constant(data.values)} for feature in continuous_features]
-        categorical_data = [{feature: tf.one_hot()
-                             for feature in categorical_features}]
+        # TODO Remove use of tf in imputer
+        # continuous_data = [{feature: tf.constant(data.values)} for feature in continuous_features]
+        # categorical_data = [{feature: tf.one_hot() for feature in categorical_features}]

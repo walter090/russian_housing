@@ -14,7 +14,6 @@ class DeepRegressor(object):
         same setup. This list should only include hidden layers, as the name
         indicates
         """
-        # TODO select feature, data input
         self.n_layers = n_layers
         self.keep_prob_value = keep_prob
         self.hidden_layer_spec = hidden_layer_spec
@@ -124,6 +123,6 @@ class DeepRegressor(object):
                     total_cost += c / total_batch
 
                 if epoch % verbose_every == 0:
-                    print 'At epoch {0}, Total training accuracy: {1:.5f}, total cost: {2:.5f}'\
+                    print 'At epoch {0}, Total training accuracy: {1:.2f}, total cost: {2:.2f}'\
                         .format(epoch, total_train_accuracy, total_cost)
             print 'Training complete'
