@@ -1,76 +1,79 @@
-from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.neighbors import KNeighborsRegressor
+from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 
 
-class Imputer(BaseEstimator, TransformerMixin):
-    def __init__(self):
-        raise NotImplementedError
+class Imputer(object):
+    def __init__(self, strategy='regression'):
+        """Constructor for imputer class
 
-
-class KNNImputer(object):
-    def __init__(self, k=5, missing_values='NaN'):
-        self.missing_values = missing_values
-        self.k = k
-
-    def impute(self, data, inplace=False):
+        Args:
+            strategy: Imputation strategy, available strategies:
+                'regression', 'knn', 'mean'. Default strategy is 'knn'
         """
-        imputer function for knn imputer. find all data entries
-        with missing data. go through each entry and apply knn regression
-        :param inplace: if set to True, apply the changes to the passed 
-        argument
-        :param data: the full data set with missing data, the data must be
-        preprocessed, i.e. does not contain any string/boolean values
-        :return: a copy of the transformed data
+        self.strategy = strategy
+
+    def impute(self, data, exclude=None, categorical=None, inplace=False, k=10):
+        """This function initiates the imputation
+
+        The function takes a Pandas data frame, and replace the values
+        specified in the constructor with imputed values
+
+        Args:
+            data (pandas.DataFrame): DataFrame, the data to be transformed
+            exclude (List[str]): list of strings, names of columns whose missing values will
+                not be imputed, default None
+            categorical (List[str]): list of strings, names of columns where the values are
+                categorical instead of continues, these columns will not be used in training,
+                default None
+            inplace (bool): Boolean, if set to True, the original data frame will be imputed,
+                default False
+            k (int): Argument for when the imputation strategy is knn, this argument set the k
+                parameter in KNN algorithm, default 10. If the strategy is other that knn, this
+                argument is ignored
+        Returns:
+            None or new data frame new_df, depends on if inplace argument is set to True or False
         """
-        """
-        TODO add argument feature_name to enable impute one specific feature
-        and enable the option between discrete and continuous values
-        """
-        nan_data = data[data.isnull().any(axis=1)]
-        purged_data = data.dropna()  # purged_data + nan_data = data
-        imp = KNeighborsRegressor(n_neighbors=self.k)
-        new_data = nan_data.copy()
+        nan_data = data[data.isnull().any(axis=1)]  # data frame columns that has missing values
+        purged_data = data.dropna(axis=1, inplace=False).drop(categorical, inplace=False)
+        # purged_data + nan_data = data, i.e. intact data
+        # purged_data will serve as a set of "training features" in the imputation process
+        purged_train = purged_data[nan_data.notnull().any(axis=0)]
+        nan_train = nan_data[nan_data.notnull().any(axis=0)]
+        # purged_train and nan_train are part of the nan and purged data that does not have
+        # missing data, therefore used for training the imputer
+        purged_target = purged_data[nan_data.isnull().any(axis=0)]
 
-        for _, row in nan_data.iterrows():
-            nan_cols = row[row.isnull()].index
-            knn_train = purged_data.drop(nan_cols, axis=1)
-            no_nan_row = row.drop(nan_cols)
-            for target in nan_cols:
-                imp.fit(knn_train, purged_data[target])
-                if inplace:
-                    data.loc[data['id'] == row['id']][target] = imp.predict(no_nan_row)
-                else:
-                    new_data.loc[data['id'] == row['id']][target] = imp.predict(no_nan_row)
-        return purged_data.append(new_data)
+        cols_with_missing_data = list(nan_data)
+        rows_missing_by_col = {}
+        data_missing = data.isnull()
+        for col in cols_with_missing_data:
+            rows_missing_by_col[col] = data[data_missing[col] == True].index.tolist()
+        # rows_missing_by_col is now a python dictionary that contain information about
+        # rows with missing data in respect to each column name
+        # {'column_name': [list of row indices]}
+        # this will be useful when replacing missing data with imputed data
 
+        if self.strategy == 'knn':
+            clf = KNeighborsClassifier(n_neighbors=k)
+            rgr = KNeighborsRegressor(n_neighbors=k)
+        else:
+            raise NotImplementedError
 
-class RegressionImputer(BaseEstimator, TransformerMixin):
-    """
-    another approach to missing data imputation: linear regression
-    """
+        new_df = data.copy()
 
-    def __init__(self, missing_values='NaN'):
-        self.missing_values = missing_values
-
-    def fit_transform(self, X, y=None, **fit_params):
-        raise NotImplementedError
-
-    @staticmethod
-    def input(data):
-        """
-        input function for the tensorflow regression model
-        :param data: pandas data frame
-        :return: a tuple of features and labels
-        """
-        continuous_features = []
-        categorical_features = []
-
-        for column in data.columns:
-            if column.dtype == 'object':
-                categorical_features.append(column)
+        for col_name in nan_data:
+            if col_name in exclude:
+                continue
+            if col_name in categorical:
+                clf.fit(purged_train, nan_train[col_name])
+                pred = clf.predict(purged_target)
             else:
-                continuous_features.append(column)
+                rgr.fit(purged_train, nan_train[col_name])
+                pred = rgr.predict(purged_target)
 
-        # TODO Remove use of tf in imputer
-        # continuous_data = [{feature: tf.constant(data.values)} for feature in continuous_features]
-        # categorical_data = [{feature: tf.one_hot() for feature in categorical_features}]
+            if inplace:
+                data.loc[rows_missing_by_col[col_name], col_name] = pred
+            else:
+                new_df.loc[rows_missing_by_col[col_name], col_name] = pred
+
+        if not inplace:
+            return new_df
