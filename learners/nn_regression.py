@@ -4,15 +4,16 @@ import tensorflow as tf
 class DeepRegressor(object):
     def __init__(self, n_layers, n_input_features, keep_prob=0.95, hidden_layer_spec=None):
         """Constructor
-        :param n_layers: number of hidden layers
-        :param n_input_features: number of input features
-        :param keep_prob: keep probability for dropout
-        :param hidden_layer_spec: list of layers in the form of list of
-         dictionaries of {'num_features': , 'keep_prob': }
-        Note that if this argument is set, the previous two 
-        arguments are ignored, otherwise all hidden layers shall have the
-        same setup. This list should only include hidden layers, as the name
-        indicates
+        Args:
+            n_layers: number of hidden layers
+            n_input_features: number of input features
+            keep_prob: keep probability for dropout
+            hidden_layer_spec: list of layers in the form of list of dictionaries of
+                {'num_features': , 'keep_prob': }
+                Note that if this argument is set, the previous two
+                arguments are ignored, otherwise all hidden layers shall have the
+                same setup. This list should only include hidden layers, as the name
+                indicates
         """
         self.n_layers = n_layers
         self.keep_prob_value = keep_prob
@@ -30,8 +31,10 @@ class DeepRegressor(object):
 
     def build_net(self, x):
         """This is the method that builds the multilayer neural network for regression
-        :param x: Training data
-        :return: output layer (prediction)
+        Args:
+            x: Training data
+        Returns:
+            output layer (prediction)
         """
         n_input = x.shape[1]  # number of input features
         n_output = 1  # number of output neurons
@@ -71,8 +74,11 @@ class DeepRegressor(object):
     @staticmethod
     def __init_weights_biases(shape):
         """Initialize weights or biases according to the given shape
-        :param shape: shape of the variable
-        :return: TensorFlow variable
+
+        Args:
+            shape: shape of the variable
+        Returns:
+            TensorFlow variable
         """
         init = tf.random_normal(shape, stddev=0.1)
         return tf.Variable(init)
@@ -86,14 +92,17 @@ class DeepRegressor(object):
                verbose_every=50):
         """This function launches the session and starts training the
         built neural net
-        :param verbose_every: int, this argument sets the number of epochs before a
-        status display
-        :param y_train: training data target label
-        :param x_train: training data features
-        :param batch_size: int, size of each batch
-        :param train_epochs: number of epochs to train the model before stopping
-        :param optimizer_class: Tensorflow optimizer class, default AdamOptimizer
-        :return: None
+
+        Args:
+            verbose_every: int, this argument sets the number of epochs before a
+                status display
+            y_train: training data target label
+            x_train: training data features
+            batch_size: int, size of each batch
+            train_epochs: number of epochs to train the model before stopping
+            optimizer_class: Tensorflow optimizer class, default AdamOptimizer
+        Returns:
+            None
         """
         predictions = self.build_net(self.x)
         cost = tf.reduce_mean(tf.square(predictions - self.y))
