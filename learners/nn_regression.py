@@ -4,6 +4,7 @@ import tensorflow as tf
 class DeepRegressor(object):
     def __init__(self, n_layers, n_input_features, keep_prob=0.95, hidden_layer_spec=None):
         """Constructor
+
         Args:
             n_layers: number of hidden layers
             n_input_features: number of input features

@@ -1,12 +1,14 @@
 def get_missing(data, minimal=0.1, full=False):
-    """
-    return a list of features with missing data the ratio of whose number of 
-    missing data entries over total data entries is larger than minimal
-    :param data: pandas data frame
-    :param minimal: set the minimal proportion of missing data to report
-    :param full: if set to True, ignore minial, report all features with
-    missing data
-    :return: 
+    """return a list of features with missing data the ratio of whose number of
+    missing data entries over total data entries is larger than minimal.
+
+    Args:
+        data: Pandas data frame
+        minimal: Set the minimal proportion of missing data to report
+        full: If set to True, ignore minial, report all features with
+            missing data
+    Returns:
+        List of features with missing data, sorted
     """
     n_rows = data.shape[0]
     null_sum = data.isnull().sum()
@@ -20,14 +22,17 @@ def get_missing(data, minimal=0.1, full=False):
 
 
 def remove_missing(data, minimal=0.1, full=False, inplace=False):
-    """
-    arguments same as get_missing, except for inplace
-    :param data: 
-    :param minimal: 
-    :param full: 
-    :param inplace: if set to True, apply the changes to the original data frame,
-    otherwise return a new object
-    :return: 
+    """Arguments same as get_missing, except for inplace
+
+    Args:
+        data: Data to have missing data removed
+        minimal: Amount of data larger than minimal will be removed
+        full: If set to True, ignore minial, report all features with
+            missing data
+        inplace: if set to True, apply the changes to the original data frame,
+            otherwise return a new object
+    Returns:
+        None or modified original data
     """
     features_missing = [feature[0] for feature in get_missing(data, minimal, full)]
     if not inplace:
@@ -38,19 +43,22 @@ def remove_missing(data, minimal=0.1, full=False, inplace=False):
 
 
 def make_transformations(data, sub_tran, filler=None):
-    """
-    this function is written for the ease of use of sklearn-pandas.
+    """This function is written for the ease of use of sklearn-pandas.
+
     sklearn-pandas DataFrameMapper only keeps features that are in the 
     transformation lists, columns that does not need transformations need
     to specify transformation as None. this function also provides an option
     to fill these features with the same transformer, specified by filler
     argument, default is None, not transformations
-    :param data: pandas data frame to extract features from
-    :param sub_tran: array. a list of pairs of feature names
-     and transformations.
-    :param filler: value or transformation to for filled features, default is None,
-    filler argument takes a class
-    :return: 
+
+    Args:
+        data: pandas data frame to extract features from
+        sub_tran: array. a list of pairs of feature names
+            and transformations.
+        filler: value or transformation to for filled features, default is None,
+            filler argument takes a class
+    Returns:
+        complete:
     """
     sub_features = [trans_pair[0] for trans_pair in sub_tran]
     appending_features = [feature for feature in list(data) if feature not in sub_features]
